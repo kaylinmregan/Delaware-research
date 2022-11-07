@@ -3,6 +3,8 @@ library(ggplot2)
 library(readxl)
 library(tidyverse)
 
+# https://ggplot2.tidyverse.org/reference/scale_viridis.html
+
 # data
 MergedData_v1 <- read_excel("~/MergedData_v1.xlsx")
 
