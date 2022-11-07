@@ -6,6 +6,23 @@ library(tidyverse)
 # data
 MergedData_v1 <- read_excel("~/MergedData_v1.xlsx")
 
+# fig 2
+# outline of plot
+# x axis - region and year
+# y axis - number of DBT
+
+# creating a pivot
+fig2 = MergedData_v1 %>% 
+  dplyr::select(Region, Year, 'Diamondback Terrapin',) %>%
+  pivot_longer(cols = -c('Region', 'Year'), values_to = 'Values')
+  
+# stacked bar graph
+ggplot(fig2, aes(y=Values, x=as.factor(Year))) + 
+  geom_bar(position="stack", stat="identity") + 
+  facet_wrap(~Region) +
+  labs(y= "Number of Diamondback Terrapins Caught", x = "Region and Year")
+
+#fig 3
 # outline of plot
 # x axis - region and year
 # y axis - number of bycatch (by species)
