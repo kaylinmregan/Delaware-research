@@ -1,0 +1,22 @@
+# library
+library(ggplot2)
+library(readxl)
+library(tidyverse)
+
+# data
+MergedData_v1 <- read_excel("~/MergedData_v1.xlsx")
+
+# outline of plot
+# x axis - region and year
+# y axis - number of bycatch (by species)
+
+# creating a pivot
+fig3 = MergedData_v1 %>% 
+  dplyr::select(Region, Year, 'Diamondback Terrapin', 'Oyster Toadfish', 'Horseshoe Crab', 'Spot', 'Atlantic Croaker', 'Summer Flounder', 'Spider Crab', 'American Eel') %>%
+  pivot_longer(cols = -c('Region', 'Year'), names_to = 'Species', values_to = 'Values')
+
+# stacked bar graph
+ggplot(fig3, aes(fill=Species, y=Values, x=as.factor(Year))) + 
+  geom_bar(position="stack", stat="identity") + 
+  facet_wrap(~Region) +
+  labs(y= "Number of Bycatch (by Species)", x = "Region and Year")
