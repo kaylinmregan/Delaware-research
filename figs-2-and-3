@@ -28,9 +28,9 @@ figure2 <- ggplot(fig2, aes(y=Values, x=as.factor(Year), fill='Diamondback Terra
     labs(y= "Number of Diamondback Terrapins Caught", x = "Region and Year") +
     scale_fill_fish_d(option = "Chlorurus_microrhinos", direction=-1) 
 figure2
-cvd_grid(figure2) #colorblind simualtor
+cvd_grid(figure2) # colorblind simualtor
 
-#fig 3
+# fig 3
 # outline of plot
 # x axis - region and year
 # y axis - number of bycatch (by species)
@@ -48,4 +48,4 @@ figure3 <- ggplot(fig3, aes(fill=Species, y=Values, x=as.factor(Year))) +
   labs(y= "Number of Bycatch (by Species)", x = "Region and Year") +
   scale_fill_fish_d(option = "Pseudochromis_aldabraensis") 
 figure3
-cvd_grid(figure3) #colorblind simualtor
+cvd_grid(figure3) # colorblind simualtor
