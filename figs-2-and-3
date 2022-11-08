@@ -2,6 +2,9 @@
 library(ggplot2)
 library(readxl)
 library(tidyverse)
+library(fishualize) 
+library(colorblindr) 
+library(rfishbase) 
 
 # https://ggplot2.tidyverse.org/reference/scale_viridis.html
 
@@ -19,10 +22,13 @@ fig2 = MergedData_v1 %>%
   pivot_longer(cols = -c('Region', 'Year'), values_to = 'Values')
   
 # stacked bar graph
-ggplot(fig2, aes(y=Values, x=as.factor(Year))) + 
-  geom_bar(position="stack", stat="identity") + 
-  facet_wrap(~Region) +
-  labs(y= "Number of Diamondback Terrapins Caught", x = "Region and Year")
+figure2 <- ggplot(fig2, aes(y=Values, x=as.factor(Year), fill='Diamondback Terrapin')) + 
+    geom_bar(position="stack", stat="identity") + 
+    facet_wrap(~Region) +
+    labs(y= "Number of Diamondback Terrapins Caught", x = "Region and Year") +
+    scale_fill_fish_d(option = "Chlorurus_microrhinos", direction=-1) 
+figure2
+cvd_grid(figure2) #colorblind simualtor
 
 #fig 3
 # outline of plot
@@ -35,7 +41,11 @@ fig3 = MergedData_v1 %>%
   pivot_longer(cols = -c('Region', 'Year'), names_to = 'Species', values_to = 'Values')
 
 # stacked bar graph
-ggplot(fig3, aes(fill=Species, y=Values, x=as.factor(Year))) + 
+
+figure3 <- ggplot(fig3, aes(fill=Species, y=Values, x=as.factor(Year))) + 
   geom_bar(position="stack", stat="identity") + 
   facet_wrap(~Region) +
-  labs(y= "Number of Bycatch (by Species)", x = "Region and Year")
+  labs(y= "Number of Bycatch (by Species)", x = "Region and Year") +
+  scale_fill_fish_d(option = "Pseudochromis_aldabraensis") 
+figure3
+cvd_grid(figure3) #colorblind simualtor
