@@ -1,51 +1,90 @@
 # library
 library(ggplot2)
+library(ggpubr)
 library(readxl)
 library(tidyverse)
-library(fishualize) 
+library(fishualize)
 library(colorblindr) 
 library(rfishbase) 
+library(gridExtra)
+library(grid)
 
-# https://ggplot2.tidyverse.org/reference/scale_viridis.html
-
-# data
 MergedData_v1 <- read_excel("~/MergedData_v1.xlsx")
 
-# fig 2
-# outline of plot
-# x axis - region and year
-# y axis - number of DBT
-
-# creating a pivot
-fig2 = MergedData_v1 %>% 
-  dplyr::select(Region, Year, 'Diamondback Terrapin',) %>%
-  pivot_longer(cols = -c('Region', 'Year'), values_to = 'Values')
-  
-# stacked bar graph
-figure2 <- ggplot(fig2, aes(y=Values, x=as.factor(Year), fill='Diamondback Terrapin')) + 
-    geom_bar(position="stack", stat="identity") + 
-    facet_wrap(~Region) +
-    labs(y= "Number of Diamondback Terrapins Caught", x = "Region and Year") +
-    scale_fill_fish_d(option = "Chlorurus_microrhinos", direction=-1) 
-figure2
-cvd_grid(figure2) # colorblind simualtor
-
-# fig 3
-# outline of plot
+# fig 2 outline of plot
 # x axis - region and year
 # y axis - number of bycatch (by species)
 
-# creating a pivot
-fig3 = MergedData_v1 %>% 
+# fig 2 data
+fig2data = MergedData_v1 %>% 
   dplyr::select(Region, Year, 'Diamondback Terrapin', 'Oyster Toadfish', 'Horseshoe Crab', 'Spot', 'Atlantic Croaker', 'Summer Flounder', 'Spider Crab', 'American Eel') %>%
   pivot_longer(cols = -c('Region', 'Year'), names_to = 'Species', values_to = 'Values')
-
-# stacked bar graph
-
-figure3 <- ggplot(fig3, aes(fill=Species, y=Values, x=as.factor(Year))) + 
+  
+ figure2 <- ggplot(fig2data, aes(fill=Species, y=Values, x=as.factor(Year))) + 
   geom_bar(position="stack", stat="identity") + 
   facet_wrap(~Region) +
   labs(y= "Number of Bycatch (by Species)", x = "Region and Year") +
   scale_fill_fish_d(option = "Pseudochromis_aldabraensis") 
-figure3
-cvd_grid(figure3) # colorblind simualtor
+figure2
+cvd_grid(figure2) #colorblind simualtor 
+
+
+
+# fig 3 outline of plot
+# x axis - region and year
+# y axis - number of bycatch (by species)
+
+# fig 3 data
+fig3data = MergedData_v1 %>% 
+  dplyr::select(Year,"DBT_CPUE", "Hab_Degradation") %>%
+  pivot_longer(cols = -c('Year', 'Hab_Degradation'), values_to = 'Values')
+
+# creating columns for mean and sd
+m_sd <- fig3data %>% 
+  group_by(Hab_Degradation, Year) %>% 
+  summarize(sd = sd(Values), 
+            mean = mean(Values)) %>% 
+  ungroup()
+
+m_sd <- m_sd %>% mutate(sd = ifelse(sd == 0, NA, sd))
+
+test <- fig3data %>%
+  filter(Year == 2021 & 
+           Hab_Degradation == "DA/AP")
+mean(test$Values)
+
+# hab degrad 2021
+fig3_2021 <- m_sd %>% 
+  filter(Year == 2021) %>%
+  ggplot(aes(y=mean, x=as.factor(Hab_Degradation))) + 
+  geom_point() + 
+  geom_errorbar(aes(x=as.factor(Hab_Degradation), ymin=mean-sd, ymax=mean+sd), width=0.1, colour="black", alpha=0.9, size=0.5) +
+  labs(x = " ",
+       y = "",
+       title = "2021") +
+  theme(axis.ticks.x=element_blank(),
+        plot.title = element_text(hjust = 1, face = "bold")) +
+  ylim(-0.01, 0.011)
+fig3_2021
+
+MergedData_v1 %>% count(Year, 
+                        Hab_Degradation)
+# hab degrad 2022
+fig3_2022 <- m_sd %>% 
+  filter(Year == 2022) %>%
+  ggplot(aes(y=mean, x=as.factor(Hab_Degradation))) + 
+  geom_point() + 
+  geom_errorbar(aes(x=as.factor(Hab_Degradation), ymin=mean-sd, ymax=mean+sd), width=0.1, colour="black", alpha=0.9, size=0.5) +
+  labs(x = "Habitat Degradation",
+       y = "",
+       title = "2022") +
+  theme(axis.ticks.x=element_blank(),
+        plot.title = element_text(hjust = 1, face = "bold")) +
+  ylim(-0.01, 0.011)
+fig3_2022
+
+# two panel plot for fig 3
+fig3_2pan <- ggarrange(fig3_2021, fig3_2022, nrow = 2)
+fig3_2pan
+
+annotate_figure(fig3_2pan, left = text_grob("Average Diamondback Terrapin CPUE", rot = 90, vjust=2))
