@@ -1,0 +1,49 @@
+graphics.off()		#==>Turn off any active graph windows
+rm(list=ls(all=TRUE))	#==>Clears the names of any objects
+
+#2021 CHANGE
+setwd("C:\\Users\\ehale\\Documents\\Fisheries\\Blue Crab\\Kaylin Regan")
+dir()	#==>change to directory where input file located
+d <-read.csv("Grid cells.csv",header=TRUE)		
+	#read data frame, ignore ["."], keep header
+	#indata$State =as.factor(indata$State)
+	#f<-f[,-1]	#Drop first column
+	#d2 <-d1[,c("Column x","Column y")]		ubset all rows for columns
+dim(d)
+f <-read.csv("bath_CCandWC.csv",header=TRUE)
+		
+
+df = merge(x=d,y=f,by="GridIDnum",all=TRUE)	
+
+h <-read.csv("distinletz.csv",header=TRUE)
+dh = merge(x=df,y=h,by="GridIDnum",all=TRUE)
+
+j <-read.csv("distshorez.csv",header=TRUE)
+dj = merge (x=dh, y=j,by="GridIDnum",all=TRUE)
+
+l <-read.csv("SEDS_wc and cc.csv",header=TRUE)
+dj = merge (x=dj, y=l,by="GridIDnum",all=TRUE)
+
+data <-read.csv("monitor_all_v1.csv",header=TRUE)
+d1 <- merge (x=data, y=dj, by="GridIDnum",all=TRUE)
+write.csv(d1,"C:\\Users\\ehale\\Documents\\Fisheries\\Blue Crab\\Kaylin Regan\\MergedData.csv", row.names = FALSE)
+
+
+library("psych")
+
+d2<-d1[,c("DBT_CPUE","Tot_CPUE","DO__mg_L_", "Salinity_ppt_", 
+"Temperature_C_", "Depth__ft_","MEAN.inlet","MEAN.shore", "MAJORITY.sed.x")]
+
+cts <- corr.test(d2, use = "pairwise",method="spearman",adjust="holm",normal=FALSE)
+#spearman for non-normally disributed data and potential non-linear relationships among covariates
+
+print(corr.p(cts$r,cts$n),short=FALSE)
+
+#perform Kolmogorov-Smirnov test
+#if <0.05, data is not normally distributed
+
+ks.test(d2$DBT_CPUE,"pnorm")		#D = 0.5, p-value < 2.2e-16 
+ks.test(d2$Tot_CPUE,"pnorm") 		#D = 0.5, p-value < 2.2e-16
+
+
+ 
