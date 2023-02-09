@@ -1,0 +1,55 @@
+library(ggplot2)
+library(ggpubr)
+library(readxl)
+library(tidyverse)
+library(gridExtra)
+library(grid)
+
+MergedData_v1 <- read_excel("Downloads/Publication/MergedData_v1.xlsx")
+
+# table 1 and 2
+# x  axis - region, 2021/2022
+# y axis - tot avg bycatch CPUE
+
+# table 1 and 2 data
+tab1_2data = MergedData_v1 %>% 
+  dplyr::select(Region, Year, Tot_CPUE) %>%
+  pivot_longer(cols = -c('Year', 'Region'), values_to = 'Values')
+
+# creating columns for mean and sd
+m_sd <- tab1_2data %>% 
+  group_by(Region, Year) %>% 
+  summarize(sd = sd(Values), 
+            mean = mean(Values)) %>% 
+  ungroup()
+m_sd <- m_sd %>% mutate(sd = ifelse(sd == 0, NA, sd))
+
+# tab 1 data -> fig
+tab1a <- m_sd %>% 
+  filter(Year == 2021) %>%
+  ggplot(aes(y=mean, x=as.factor(Region))) + 
+  geom_point() + 
+  geom_errorbar(aes(x=as.factor(Region), ymin=mean-sd, ymax=mean+sd), width=0.1, colour="black", alpha=0.9, linewidth=0.5) +
+  labs(x = "",
+       y = "",
+       title = "2021") +
+  theme(axis.ticks.x=element_blank(),
+        plot.title = element_text(hjust = 1, face = "bold"))
+tab1a
+
+
+tab2a <- m_sd %>% 
+  filter(Year == 2022) %>%
+  ggplot(aes(y=mean, x=as.factor(Region))) + 
+  geom_point() + 
+  geom_errorbar(aes(x=as.factor(Region), ymin=mean-sd, ymax=mean+sd), width=0.1, colour="black", alpha=0.9, linewidth=0.5) +
+  labs(x = "Region",
+       y = "",
+       title = "2022") +
+  theme(axis.ticks.x=element_blank(),
+        plot.title = element_text(hjust = 1, face = "bold"))
+tab2a
+
+figs_2pan <- ggarrange(tab1a, tab2a, nrow = 2)
+figs_2pan
+  
